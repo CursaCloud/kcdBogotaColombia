@@ -159,6 +159,27 @@ kubectl -n app get pods,svc
 
 ---
 
+```bash
+# Verificar que los pods están corriendo
+kubectl -n app get pods
+
+# Hacer port-forward del Service hacia localhost:8080
+kubectl -n app port-forward svc/kcd-app 8080:80
+
+# En otra terminal (Linux/macOS)
+curl http://localhost:8080
+
+# En otra terminal (Windows PowerShell)
+Invoke-WebRequest http://localhost:8080 -UseBasicParsing
+
+# Ver logs generados por la app
+kubectl -n app logs -l app=kcd-app --tail=20
+
+# Alternativa: exponer directamente con minikube
+minikube -p kcd-castle service kcd-app -n app --url
+
+---
+
 ## 3) Escudo 1 — Trivy
 ```powershell
 trivy fs --exit-code 0 --no-progress .

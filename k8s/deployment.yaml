@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kcd-app
+  namespace: app
+  labels:
+    app.kubernetes.io/name: kcd-app
+    app.kubernetes.io/part-of: kcd-workshop
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: kcd-app
+  template:
+    metadata:
+      labels:
+        app: kcd-app
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: kcd-app
+          image: kcd-app:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true

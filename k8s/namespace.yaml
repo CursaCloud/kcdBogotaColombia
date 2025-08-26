@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: app
+  labels:
+    app.kubernetes.io/name: app
+    app.kubernetes.io/part-of: kcd-workshop
+    app.kubernetes.io/managed-by: kubectl
+  annotations:
+    description: "Namespace para el despliegue de la aplicación demo del workshop Castillos y Escudos (KCD Bogotá)."

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kcd-app
+  namespace: app
+  labels:
+    app.kubernetes.io/name: kcd-app
+    app.kubernetes.io/part-of: kcd-workshop
+spec:
+  selector:
+    app: kcd-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
