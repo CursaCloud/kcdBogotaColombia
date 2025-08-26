@@ -177,6 +177,7 @@ kubectl -n app logs -l app=kcd-app --tail=20
 
 # Alternativa: exponer directamente con minikube
 minikube -p kcd-castle service kcd-app -n app --url
+```
 
 ---
 
