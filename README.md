@@ -195,10 +195,12 @@ trivy image --severity HIGH,CRITICAL kcd-app:local
 
 ## 4) Escudo 2 — OPA/Conftest
 ```powershell
-conftest test k8s/deployment.yaml -p policies/opa
+conftest test -p policies/opa --namespace k8s.security k8s/deployment3.yaml
 ```
 
-- Si quieres mostrar fallos: quita `resources.limits` en el YAML y vuelve a correr.
+- Podemos quitar: quita `resources.limits` en el YAML y vuelve a correr.
+
+- Si quieres mostrar resultados sin errores ejecutar deployment.yaml.
 
 **Narrativa:**  
 > “OPA valida en la puerta: si no cumples las reglas, no pasas.”
@@ -209,35 +211,27 @@ conftest test k8s/deployment.yaml -p policies/opa
 Instalar Kyverno y aplicar políticas:
 ```powershell
 kubectl apply -f https://raw.githubusercontent.com/kyverno/kyverno/main/config/install.yaml
-kubectl -n kyverno get pods
+
 kubectl apply -f policies/kyverno/
 kubectl get cpol
+
 ```
 
 Probar un manifiesto “malo”:
 ```powershell
-@"
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: bad-deploy
-  namespace: app
-spec:
-  replicas: 1
-  selector:
-    matchLabels: { app: bad-deploy }
-  template:
-    metadata:
-      labels: { app: bad-deploy }
-    spec:
-      containers:
-      - name: c
-        image: nginx:latest
-"@ | Out-File .\bad-deploy.yaml -Encoding utf8
 
-kubectl apply -f .\bad-deploy.yaml
+kyverno apply policies/kyverno/ --resource k8s/deployment-bad.yaml --namespace app
+
 ```
 
+✅ Kyverno lo rechaza con mensaje de error.
+
+Probar un manifiesto “malo”:
+```powershell
+
+kyverno apply policies/kyverno/ --resource k8s/deployment.yaml --namespace app
+
+```
 ✅ Kyverno lo rechaza con mensaje de error.
 
 **Narrativa:**  

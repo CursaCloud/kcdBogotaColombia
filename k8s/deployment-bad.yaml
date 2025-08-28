@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bad-deploy
+  namespace: app
+  labels:
+    app.kubernetes.io/name: bad-deploy
+    app.kubernetes.io/part-of: kcd-workshop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bad-deploy
+  template:
+    metadata:
+      labels:
+        app: bad-deploy
+    spec:
+      # ❌ Sin securityContext a nivel Pod (viola default-seccomp: espera RuntimeDefault)
+      containers:
+        - name: web
+          image: nginx:latest            # ❌ Viola disallow-latest-tag
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          # ❌ Sin resources (viola require-requests-limits)
+          # resources:
+          #   requests:
+          #     cpu: "100m"
+          #     memory: "128Mi"
+          #   limits:
+          #     cpu: "200m"
+          #     memory: "256Mi"
+          securityContext:
+            allowPrivilegeEscalation: true  # ❌ Mala práctica adicional

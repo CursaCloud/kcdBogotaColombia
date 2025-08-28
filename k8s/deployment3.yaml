@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kcd-app-bad
+  namespace: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: kcd-app-bad }
+  template:
+    metadata:
+      labels: { app: kcd-app-bad }
+    spec:
+      containers:
+      - name: kcd-app
+        image: nginx:latest
+        ports:
+        - containerPort: 8080
+        securityContext:
+          allowPrivilegeEscalation: true
