@@ -6,13 +6,32 @@ metadata:
   labels:
     app: log-generator
 spec:
+  restartPolicy: Never
+  securityContext:
+    seccompProfile:
+      type: RuntimeDefault
   containers:
-  - name: busybox
-    image: busybox:1.36
-    command: ["/bin/sh", "-c"]
-    args:
-      - |
-        while true; do
-          echo "$(date) - Hola KCD Bogotá desde Fluentd!";
-          sleep 5;
-        done
+    - name: logger
+      image: busybox:1.36
+      command: ["/bin/sh", "-lc"]
+      args:
+        - |
+          i=0
+          while true; do
+            echo "$(date) - Hola KCD Bogotá - log $$ $i"
+            i=$((i+1))
+            sleep 3
+          done
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 128Mi
+      securityContext:
+        allowPrivilegeEscalation: false
+        runAsNonRoot: true
+        runAsUser: 1000
+        capabilities:
+          drop: ["ALL"]

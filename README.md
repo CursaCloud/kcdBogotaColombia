@@ -243,9 +243,24 @@ kyverno apply policies/kyverno/ --resource k8s/deployment.yaml --namespace app
 Desplegar Fluentd:
 ```powershell
 kubectl apply -f logging/fluentd/ns.yaml
+kubectl apply -f logging/fluentd/rbac.sa.yaml
+kubectl apply -f logging/fluentd/rbac.clusterrole.yaml
+kubectl apply -f logging/fluentd/rbac.clusterrolebinding.yaml
 kubectl apply -f logging/fluentd/configmap.yaml
 kubectl apply -f logging/fluentd/daemonset.yaml
-kubectl -n logging get pods
+
+Comprobar que el DaemonSet está en Running
+
+kubectl -n logging rollout status ds/fluentd
+kubectl -n logging get pods -l app=fluentd -o wide
+
+Generar logs de prueba en app
+kubectl -n app run log-generator --image=busybox:1.36 --restart=Never \
+  -- /bin/sh -c 'i=0; while true; do echo "$(date) - Hola KCD Bogotá - log $$ $i"; i=$((i+1)); sleep 3; done'
+
+Ver logs procesados por Fluentd
+kubectl -n logging logs -l app=fluentd --tail=200 | grep "Hola KCD Bogotá" || true
+
 ```
 
 Generar tráfico y revisar logs:
@@ -258,6 +273,13 @@ kubectl -n logging logs -l app=fluentd -f --tail=100
 **Narrativa:**  
 > “Los vigías en las torres reportan todo lo que pasa dentro del castillo.”
 
+
+Errores comunes 
+unreadable ... .log: faltan montajes hostPath o permisos → usar parser cri, montar /var/log/* readOnly, y (si hace falta) privileged: true.
+
+Read-only file system @ ... positions.log: pos_file apuntaba a /var/log/... → mover a /fluentd/log/positions.log con emptyDir.
+
+No enriquece con metadata: falta kubernetes_metadata o permisos RBAC.
 ---
 
 ## 7) Cierre
